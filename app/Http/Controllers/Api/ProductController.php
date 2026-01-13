@@ -11,6 +11,44 @@ class ProductController extends Controller
 {
     use ApiResponse;
 
+    public function sell(Request $request, $id)
+    {
+        //ambil produk berdasarkan ID
+        $product = Product::find($id);
+
+        //jika produk tidak ditemukan
+        if (!$product) {
+            return response()->json([
+                'message' => "Produk tidak ditemukan"
+            ], 404);
+        }
+
+        //ambil jumlah yang mau dijual
+        $qty = $request->input('qty');
+
+        //validasi sederhana
+        if ($qty <= 0) {
+            return response()->json([
+                'message' => 'Jumlah jual harus lebih dari 0'
+            ], 400);
+        }
+        //cek stok cukup atau tidak
+        if ($product->stock < $qty) {
+            return response()->json([
+                'message' => 'Stok tidak cukup'
+            ], 400);
+        }
+
+        // kurangi stok
+        $product->stock = $product->stock - $qty;
+        $product->save();
+
+        //response sukses
+        return response()->json([
+            'message' => 'Produk berhasil dijual',
+            'sisa_stok' => $product->stock
+        ]);
+    }
 
     public function index(Request $request)
     {
