@@ -36,37 +36,32 @@ class UserController extends Controller
 
         $user = User::create($validated);
 
-        return response()->json(['status' => 'success', 'user' => $user]);
+        return $this->successResponse($user, 'User created successfully', 201);
     }
 
     public function show(string $id)
     {
-        $user = User::findOrFail($id);
-        return response()->json(['status' => 'success', 'user' => $user]);
+        $user = User::find($id);
+        if (!$user) {
+            return $this->errorResponse('User not found', 401);
+        }
+        return $this->successResponse($user, 'User retrieved successfully');
     }
 
     public function changeRole(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
+        if (!$user) {
+            return $this->errorResponse('User not found', 401);
+        }
 
         $request->validate([
             'role_id' => ['required', Rule::exists('roles', 'id')],
         ]);
 
-        $role = Role::findOrFail($request->role_id);
-        $validRoles = ['Admin', 'Seller', 'Pelanggan'];
-        if (!in_array($role->name, $validRoles)) {
-            return response()->json([
-                'message' => 'Role tidak valid. Hanya boleh Admin, Seller, atau Pelanggan.'
-            ], 422);
-        }
-
-        $user->role_id = $role->id;
+        $user->role_id = $request->role_id;
         $user->save();
 
-        return response()->json([
-            'message' => 'Role user berhasil diubah',
-            'user' => $user->fresh()
-        ]);
+        return $this->successResponse($user, 'User role updated successfully', 201);
     }
 }
