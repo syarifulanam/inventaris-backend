@@ -13,41 +13,26 @@ class ProductController extends Controller
 
     public function sell(Request $request, $id)
     {
-        //ambil produk berdasarkan ID
         $product = Product::find($id);
 
-        //jika produk tidak ditemukan
         if (!$product) {
-            return response()->json([
-                'message' => "Produk tidak ditemukan"
-            ], 404);
+            return $this->errorResponse('User not found', 404);
         }
 
-        //ambil jumlah yang mau dijual
         $qty = $request->input('qty');
 
-        //validasi sederhana
         if ($qty <= 0) {
-            return response()->json([
-                'message' => 'Jumlah jual harus lebih dari 0'
-            ], 400);
-        }
-        //cek stok cukup atau tidak
-        if ($product->stock < $qty) {
-            return response()->json([
-                'message' => 'Stok tidak cukup'
-            ], 400);
+            return $this->errorResponse('minimal qty is one', 400);
         }
 
-        // kurangi stok
+        if ($product->stock < $qty) {
+            return $this->errorResponse('stock is not enough', 400);
+        }
+
         $product->stock = $product->stock - $qty;
         $product->save();
 
-        //response sukses
-        return response()->json([
-            'message' => 'Produk berhasil dijual',
-            'sisa_stok' => $product->stock
-        ]);
+        return $this->successResponse($product, 'Product created successfully');
     }
 
     public function index(Request $request)

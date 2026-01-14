@@ -43,7 +43,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return $this->errorResponse('User not found', 401);
+            return $this->errorResponse('User not found', 404);
         }
         return $this->successResponse($user, 'User retrieved successfully');
     }
@@ -52,7 +52,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return $this->errorResponse('User not found', 401);
+            return $this->errorResponse('User not found', 404);
         }
 
         $request->validate([
@@ -62,6 +62,6 @@ class UserController extends Controller
         $user->role_id = $request->role_id;
         $user->save();
 
-        return $this->successResponse($user, 'User role updated successfully', 201);
+        return $this->successResponse($user, 'User role updated successfully', 200);
     }
 }
