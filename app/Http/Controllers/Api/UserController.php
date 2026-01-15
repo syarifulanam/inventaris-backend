@@ -18,7 +18,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $user = User::orderBy('created_at', 'desc')->paginate($perPage);
+        $user = User::with('role')->orderBy('created_at', 'desc')->paginate($perPage);
 
         return $this->paginatedResponse($user, 'User list retrieved successfully');
     }
@@ -36,12 +36,12 @@ class UserController extends Controller
 
         $user = User::create($validated);
 
-        return $this->successResponse($user, 'User created successfully', 201);
+        return $this->successResponse($user->load('role'), 'User created successfully', 201);
     }
 
     public function show(string $id)
     {
-        $user = User::find($id);
+        $user = User::with('role')->find($id);
         if (!$user) {
             return $this->errorResponse('User not found', 404);
         }
@@ -62,6 +62,6 @@ class UserController extends Controller
         $user->role_id = $request->role_id;
         $user->save();
 
-        return $this->successResponse($user, 'User role updated successfully', 200);
+        return $this->successResponse($user->load('role'), 'User role updated successfully', 200);
     }
 }
